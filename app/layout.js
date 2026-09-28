@@ -4,6 +4,7 @@ import { WhatsAppWidget } from '@/components/ui/WhatsAppWidget';
 import NextAuthProvider from '@/components/providers/NextAuthProvider';
 import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import { ProjectsProvider } from '@/context/ProjectsContext';
+import { Analytics } from '@vercel/analytics/next';
 import '../styles/globals.css';
 
 /* ─── Font Loading ──────────────────────────────────────────── */
@@ -142,6 +143,7 @@ export default function RootLayout({ children }) {
                 {children}
               </div>
               <WhatsAppWidget />
+              <Analytics />
             </ProjectsProvider>
           </AdminAuthProvider>
         </NextAuthProvider>

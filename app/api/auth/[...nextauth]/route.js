@@ -39,11 +39,14 @@ const handler = NextAuth({
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return url;
+      if (!url) return baseUrl || '/';
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
       try {
-        if (new URL(url).origin === baseUrl) return url;
-      } catch {}
-      return '/';
+        const u = new URL(url, baseUrl);
+        const b = new URL(baseUrl);
+        if (u.origin === b.origin) return url;
+      } catch (e) {}
+      return baseUrl || '/';
     },
     async signIn({ user }) {
       try {

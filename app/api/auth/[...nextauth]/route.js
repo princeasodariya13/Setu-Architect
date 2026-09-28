@@ -39,35 +39,39 @@ const handler = NextAuth({
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      if (!url) return baseUrl || '/';
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (!url) return '/';
+      if (url.startsWith("/")) return url;
       try {
         const u = new URL(url, baseUrl);
         const b = new URL(baseUrl);
         if (u.origin === b.origin) return url;
       } catch (e) {}
-      return baseUrl || '/';
+      return '/';
     },
     async signIn({ user }) {
       try {
         await connectMongo();
         
+        const userEmail = user?.email?.toLowerCase();
+        if (!userEmail) return '/?error=AccessDenied';
+
         // SECURITY: Check if email exists in MongoDB Admin collection
-        const adminUser = await Admin.findOne({ email: user.email.toLowerCase() });
-        const fallbackAdminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'setuarchitect@gmail.com';
+        const adminUser = await Admin.findOne({ email: userEmail });
+        const fallbackAdminEmail = (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'setuarchitect@gmail.com').toLowerCase();
         
-        if (adminUser || user.email.toLowerCase() === fallbackAdminEmail.toLowerCase()) {
+        if (adminUser || userEmail === fallbackAdminEmail) {
           return true; 
         }
-        return false; // Reject anyone else trying to log in
+        // Redirect back to home page with AccessDenied error parameter
+        return '/?error=AccessDenied';
       } catch (error) {
         console.error("Auth Error:", error);
-        return false;
+        return '/?error=AccessDenied';
       }
     }
   },
   pages: {
-    signIn: '/', // If login fails, redirect to home page
+    signIn: '/',
     error: '/',
   }
 });

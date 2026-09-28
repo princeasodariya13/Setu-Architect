@@ -25,8 +25,9 @@ export function AdminAuthProvider({ children }) {
     return res; // returns { error, status, ok, url }
   };
 
-  const logout = () => {
-    signOut({ callbackUrl: '/' });
+  const logout = async () => {
+    await signOut({ redirect: false });
+    window.location.href = '/';
   };
 
   return (

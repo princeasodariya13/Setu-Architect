@@ -318,9 +318,8 @@ export default function AdminPage() {
     setTimeout(() => setToast({ msg: '', type: '' }), 3000);
   };
 
-  const handleLogout = () => {
-    logout();
-    router.replace('/');
+  const handleLogout = async () => {
+    await logout();
   };
 
   if (isLoading || !isAdmin) {

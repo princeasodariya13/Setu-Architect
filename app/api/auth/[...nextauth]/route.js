@@ -38,6 +38,13 @@ const handler = NextAuth({
     })
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return url;
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {}
+      return '/';
+    },
     async signIn({ user }) {
       try {
         await connectMongo();

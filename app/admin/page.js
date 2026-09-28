@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Plus, Trash2, LogOut, ShieldCheck,
   FolderOpen, Image as ImageIcon, Tag, AlignLeft,
   X, Save, Building2, CheckCircle2, AlertCircle, Eye,
-  Sun, Moon
+  Sun, Moon, Pencil
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { useProjects } from '@/context/ProjectsContext';
@@ -42,7 +42,7 @@ function StatCard({ icon: Icon, label, value, color, isDark }) {
 }
 
 /* ─── Project Card ──────────────────────────────────────────── */
-function ProjectCard({ project, onDelete, isDark }) {
+function ProjectCard({ project, onEdit, onDelete, isDark }) {
   const [confirm, setConfirm] = useState(false);
   return (
     <motion.div
@@ -50,8 +50,9 @@ function ProjectCard({ project, onDelete, isDark }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className={`border rounded-2xl overflow-hidden group transition-colors ${
-        isDark ? 'bg-neutral-900 border-white/8' : 'bg-white border-stone-200/80 shadow-sm'
+      onClick={() => onEdit(project)}
+      className={`border rounded-2xl overflow-hidden group cursor-pointer transition-all hover:shadow-lg ${
+        isDark ? 'bg-neutral-900 border-white/8 hover:border-white/20' : 'bg-white border-stone-200/80 shadow-sm hover:border-stone-300'
       }`}
     >
       <div className="relative h-44 overflow-hidden">
@@ -60,37 +61,49 @@ function ProjectCard({ project, onDelete, isDark }) {
           alt={project.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
         <span className="absolute bottom-3 left-3 text-xs font-semibold bg-amber-500 text-black px-2.5 py-1 rounded-full shadow-sm">
           {project.category}
         </span>
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white text-[11px] px-2 py-1 rounded-lg backdrop-blur-sm flex items-center gap-1">
+          <Pencil className="w-3 h-3" />
+          Click to View/Edit
+        </div>
       </div>
       <div className="p-4">
         <h3 className={`font-semibold text-sm truncate ${isDark ? 'text-white' : 'text-stone-900'}`}>{project.name}</h3>
         {project.description && (
           <p className={`text-xs mt-1 line-clamp-2 ${isDark ? 'text-neutral-500' : 'text-stone-600'}`}>{project.description}</p>
         )}
-        <div className="mt-3 flex justify-end">
+        <div className="mt-4 pt-3 border-t flex items-center justify-between gap-2 border-dashed border-neutral-500/30">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(project); }}
+            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors ${
+              isDark ? 'bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+            }`}
+          >
+            <Pencil className="w-3 h-3 text-amber-500" />
+            View / Edit
+          </button>
+
           {confirm ? (
-            <div className="flex items-center gap-2">
-              <span className={`text-xs ${isDark ? 'text-neutral-400' : 'text-stone-500'}`}>Sure?</span>
+            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <span className={`text-[11px] ${isDark ? 'text-neutral-400' : 'text-stone-500'}`}>Sure?</span>
               <button
-                onClick={() => onDelete(project.id)}
-                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-colors ${
-                  isDark ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-red-100 text-red-600 hover:bg-red-200'
-                }`}
+                onClick={(e) => { e.stopPropagation(); onDelete(project.id); }}
+                className="text-[11px] px-2 py-0.5 bg-red-500 text-white font-bold hover:bg-red-600 rounded-md transition-colors"
               >Yes</button>
               <button
-                onClick={() => setConfirm(false)}
-                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-colors ${
-                  isDark ? 'bg-white/5 text-neutral-400 hover:bg-white/10' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                onClick={(e) => { e.stopPropagation(); setConfirm(false); }}
+                className={`text-[11px] px-2 py-0.5 rounded-md font-medium transition-colors ${
+                  isDark ? 'bg-white/10 text-neutral-300' : 'bg-stone-200 text-stone-700'
                 }`}
               >No</button>
             </div>
           ) : (
             <button
-              onClick={() => setConfirm(true)}
-              className={`flex items-center gap-1.5 text-xs transition-colors px-2 py-1 rounded-lg ${
+              onClick={(e) => { e.stopPropagation(); setConfirm(true); }}
+              className={`flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg ${
                 isDark ? 'text-neutral-500 hover:text-red-400 hover:bg-red-500/10' : 'text-stone-500 hover:text-red-600 hover:bg-red-50'
               }`}
             >
@@ -103,6 +116,353 @@ function ProjectCard({ project, onDelete, isDark }) {
     </motion.div>
   );
 }
+
+/* ─── Project Detail & Edit Modal ────────────────────────────── */
+const ProjectDetailModal = ({ project, isOpen, onClose, onUpdate, onDelete, isDark }) => {
+  const [form, setForm] = useState({ name: '', category: '', img: '', description: '' });
+  const [isEditing, setIsEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [toast, setToast] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (project) {
+      setForm({
+        name: project.name || '',
+        category: project.category || '',
+        img: project.img || '',
+        description: project.description || ''
+      });
+      setIsEditing(false);
+      setConfirmDelete(false);
+      setToast('');
+    }
+  }, [project]);
+
+  if (!isOpen || !project) return null;
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setToast('Please upload a valid image file.');
+      setTimeout(() => setToast(''), 3000);
+      return;
+    }
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const imgElement = new window.Image();
+      imgElement.src = event.target.result;
+      imgElement.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = imgElement.width;
+        let height = imgElement.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgElement, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        setForm(p => ({ ...p, img: dataUrl }));
+        setIsUploading(false);
+      };
+    };
+  };
+
+  const handleSave = async (e) => {
+    if (e) e.preventDefault();
+    if (!form.name.trim() || !form.category.trim() || !form.img) {
+      setToast('Name, Category, and Image are required.');
+      setTimeout(() => setToast(''), 3000);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await onUpdate(project.id, form);
+      setIsEditing(false);
+      onClose();
+    } catch (err) {
+      setToast('Failed to update project.');
+      setTimeout(() => setToast(''), 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    await onDelete(project.id);
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className={`fixed inset-0 z-[300] backdrop-blur-sm ${isDark ? 'bg-black/75' : 'bg-black/50'}`}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 z-[301] flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div className={`w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl transition-colors border my-auto ${
+              isDark ? 'bg-neutral-950 border-white/10 text-white' : 'bg-white border-stone-200 text-stone-900'
+            }`} onClick={(e) => e.stopPropagation()}>
+              <div className="h-1.5 bg-gradient-to-r from-amber-500 to-amber-600" />
+              
+              {/* Header */}
+              <div className={`p-6 border-b flex items-center justify-between ${isDark ? 'border-white/10' : 'border-stone-200'}`}>
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-full text-xs font-bold uppercase tracking-wider">
+                    {form.category || 'Project Details'}
+                  </span>
+                  <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                    {isEditing ? 'Edit Project Details' : 'Project Details'}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!isEditing ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                        isDark ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30' : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                      }`}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit Details
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                        isDark ? 'bg-white/5 text-neutral-400 hover:text-white' : 'bg-stone-100 text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                  <button onClick={onClose} className={`p-1.5 rounded-lg transition-colors ${
+                    isDark ? 'text-neutral-500 hover:text-white hover:bg-white/5' : 'text-stone-400 hover:text-stone-900 hover:bg-stone-100'
+                  }`}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                {/* Image Section */}
+                <div className="space-y-2">
+                  <label className={`text-xs font-semibold uppercase tracking-widest block ${isDark ? 'text-neutral-400' : 'text-stone-600'}`}>
+                    Project Image
+                  </label>
+                  <div className={`relative w-full h-56 rounded-xl overflow-hidden border flex items-center justify-center ${
+                    isDark ? 'bg-black/60 border-white/10' : 'bg-stone-100 border-stone-200'
+                  }`}>
+                    <img src={form.img} alt={form.name} className="max-h-full w-full object-contain" />
+                  </div>
+
+                  {isEditing && (
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className={`w-full text-xs transition-all cursor-pointer border rounded-xl p-2 ${
+                          isDark
+                            ? 'bg-white/5 border-white/10 text-neutral-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-400'
+                            : 'bg-stone-50 border-stone-300 text-stone-600 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-700'
+                        }`}
+                      />
+                      {isUploading && (
+                        <p className="text-xs text-amber-500 mt-1 flex items-center gap-1.5">
+                          <svg className="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+                          Uploading new image...
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Info / Edit Fields */}
+                {!isEditing ? (
+                  /* VIEW MODE */
+                  <div className="space-y-4">
+                    <div>
+                      <span className={`text-xs font-semibold uppercase tracking-widest block mb-1 ${isDark ? 'text-neutral-500' : 'text-stone-400'}`}>
+                        Project Name
+                      </span>
+                      <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-stone-900'}`}>
+                        {form.name}
+                      </h2>
+                    </div>
+
+                    <div>
+                      <span className={`text-xs font-semibold uppercase tracking-widest block mb-1 ${isDark ? 'text-neutral-500' : 'text-stone-400'}`}>
+                        Category
+                      </span>
+                      <p className={`text-sm font-medium ${isDark ? 'text-neutral-300' : 'text-stone-700'}`}>
+                        {form.category}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className={`text-xs font-semibold uppercase tracking-widest block mb-1 ${isDark ? 'text-neutral-500' : 'text-stone-400'}`}>
+                        Full Description
+                      </span>
+                      <div className={`p-4 rounded-xl border leading-relaxed text-sm ${
+                        isDark ? 'bg-white/5 border-white/10 text-neutral-300' : 'bg-stone-50 border-stone-200 text-stone-700'
+                      }`}>
+                        {form.description || <span className="italic text-neutral-400">No description provided.</span>}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* EDIT MODE */
+                  <form onSubmit={handleSave} className="space-y-4">
+                    {/* Name */}
+                    <div>
+                      <label className={`text-xs font-semibold uppercase tracking-widest block mb-1.5 ${isDark ? 'text-neutral-400' : 'text-stone-600'}`}>
+                        Project Name *
+                      </label>
+                      <input
+                        type="text" required
+                        value={form.name}
+                        onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                        className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-amber-500 transition-all ${
+                          isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-stone-50 border-stone-300 text-stone-900'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                      <label className={`text-xs font-semibold uppercase tracking-widest block mb-1.5 ${isDark ? 'text-neutral-400' : 'text-stone-600'}`}>
+                        Category *
+                      </label>
+                      <input
+                        type="text" required
+                        value={form.category}
+                        onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                        className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-amber-500 transition-all ${
+                          isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-stone-50 border-stone-300 text-stone-900'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className={`text-xs font-semibold uppercase tracking-widest block mb-1.5 ${isDark ? 'text-neutral-400' : 'text-stone-600'}`}>
+                        Full Description
+                      </label>
+                      <textarea
+                        value={form.description}
+                        onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                        rows={4}
+                        className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-amber-500 transition-all resize-none ${
+                          isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-stone-50 border-stone-300 text-stone-900'
+                        }`}
+                      />
+                    </div>
+
+                    {toast && (
+                      <div className="flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <span className="text-red-500 text-xs">{toast}</span>
+                      </div>
+                    )}
+                  </form>
+                )}
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className={`p-6 border-t flex flex-wrap items-center justify-between gap-3 ${isDark ? 'border-white/10 bg-neutral-900/50' : 'border-stone-200 bg-stone-50'}`}>
+                {confirmDelete ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-red-500 font-semibold">Delete project permanently?</span>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-colors"
+                    >
+                      Yes, Delete
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(false)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                        isDark ? 'bg-white/10 text-neutral-300' : 'bg-stone-200 text-stone-700'
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 rounded-xl text-xs font-bold transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove Project
+                  </button>
+                )}
+
+                <div className="flex items-center gap-3">
+                  {isEditing ? (
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={isUploading || isSubmitting}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
+                    >
+                      <Save className="w-4 h-4" />
+                      {isSubmitting ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-[0.98]"
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Edit Details
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
 
 /* ─── Add Project Modal ─────────────────────────────────────── */
 const AddProjectModal = ({ isOpen, onClose, onAdd, isDark }) => {
@@ -385,10 +745,11 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm, isLoggingOut, isDark }
 export default function AdminPage() {
   const router = useRouter();
   const { isAdmin, isLoading, logout } = useAdminAuth();
-  const { projects, addProject, removeProject } = useProjects();
+  const { projects, addProject, updateProject, removeProject } = useProjects();
   
   const [theme, setTheme] = useState('light');
   const [showAdd, setShowAdd] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [toast, setToast] = useState({ msg: '', type: '' });
@@ -419,6 +780,11 @@ export default function AdminPage() {
   const handleAdd = (project) => {
     addProject(project);
     showToast('Project added successfully!', 'success');
+  };
+
+  const handleUpdate = async (id, updatedData) => {
+    await updateProject(id, updatedData);
+    showToast('Project updated successfully!', 'success');
   };
 
   const handleDelete = (id) => {
@@ -553,7 +919,7 @@ export default function AdminPage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-stone-900'}`}>Projects</h2>
-            <p className={`text-sm mt-0.5 ${isDark ? 'text-neutral-500' : 'text-stone-500'}`}>{projects.length} project{projects.length !== 1 ? 's' : ''} in portfolio</p>
+            <p className={`text-sm mt-0.5 ${isDark ? 'text-neutral-500' : 'text-stone-500'}`}>{projects.length} project{projects.length !== 1 ? 's' : ''} in portfolio (Click any card to View / Edit details)</p>
           </div>
           <button
             id="add-project-btn"
@@ -569,7 +935,13 @@ export default function AdminPage() {
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           <AnimatePresence>
             {projects.map(project => (
-              <ProjectCard key={project.id} project={project} onDelete={handleDelete} isDark={isDark} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onEdit={(p) => setSelectedProject(p)}
+                onDelete={handleDelete}
+                isDark={isDark}
+              />
             ))}
           </AnimatePresence>
         </motion.div>
@@ -584,6 +956,16 @@ export default function AdminPage() {
 
       {/* Add Project Modal */}
       <AddProjectModal isOpen={showAdd} onClose={() => setShowAdd(false)} onAdd={handleAdd} isDark={isDark} />
+
+      {/* View & Edit Project Detail Modal */}
+      <ProjectDetailModal
+        project={selectedProject}
+        isOpen={!!selectedProject}
+        onClose={() => setSelectedProject(null)}
+        onUpdate={handleUpdate}
+        onDelete={handleDelete}
+        isDark={isDark}
+      />
 
       {/* Logout Confirmation Modal */}
       <LogoutConfirmModal
@@ -615,4 +997,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
 

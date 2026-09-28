@@ -129,6 +129,32 @@ export function ProjectsProvider({ children }) {
     }
   };
 
+  const updateProject = async (id, updatedData) => {
+    try {
+      // optimistic update
+      setProjects(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
+      
+      const res = await fetch(`/api/projects/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      });
+      const json = await res.json();
+      
+      if (json.success) {
+        const updated = { ...json.data, id: json.data._id };
+        setProjects(prev => prev.map(p => p.id === id ? updated : p));
+      }
+      
+      // Notify other tabs
+      const channel = new BroadcastChannel('projects_sync');
+      channel.postMessage('updated');
+      channel.close();
+    } catch (error) {
+      console.error("Failed to update project", error);
+    }
+  };
+
   const removeProject = async (id) => {
     try {
       // optimistic update
@@ -148,7 +174,7 @@ export function ProjectsProvider({ children }) {
   };
 
   return (
-    <ProjectsContext.Provider value={{ projects, isLoaded, addProject, removeProject }}>
+    <ProjectsContext.Provider value={{ projects, isLoaded, addProject, updateProject, removeProject }}>
       {children}
     </ProjectsContext.Provider>
   );

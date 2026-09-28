@@ -74,10 +74,10 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Check for AccessDenied error from Google OAuth
+  // Check for OAuth or Auth error parameter to display in Admin Login modal
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('error') === 'AccessDenied') {
+    if (params.get('error')) {
       setShowAdminLogin(true);
     }
   }, []);

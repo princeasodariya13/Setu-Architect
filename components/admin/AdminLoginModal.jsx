@@ -29,12 +29,21 @@ export default function AdminLoginModal({ isOpen, onClose }) {
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
-  // Check for Access Denied error when modal opens
+  // Check for Access Denied or OAuth error when modal opens
   useEffect(() => {
     if (isOpen) {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('error') === 'AccessDenied') {
-        setError('Access Denied: Only setuarchitect@gmail.com is authorized.');
+      const errParam = params.get('error');
+      if (errParam) {
+        if (errParam === 'AccessDenied') {
+          setError('Access Denied: This Google account is not registered or authorized as an Admin.');
+        } else if (errParam === 'OAuthCallback' || errParam === 'OAuthSignin') {
+          setError('Google Sign-in failed or was cancelled. Please try again.');
+        } else if (errParam === 'CredentialsSignin') {
+          setError('Invalid credentials: Email or password incorrect or account not found.');
+        } else {
+          setError('Authentication Error: Invalid credentials or unauthorized account.');
+        }
         // Clean up URL so error doesn't persist
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -61,7 +70,7 @@ export default function AdminLoginModal({ isOpen, onClose }) {
         router.push('/admin');
       }, 1000);
     } else {
-      setError('Invalid email or password.');
+      setError('Invalid credentials: Email or password is incorrect or user not found.');
     }
     setCredsLoading(false);
   };

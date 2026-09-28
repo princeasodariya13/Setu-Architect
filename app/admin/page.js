@@ -387,17 +387,19 @@ export default function AdminPage() {
   const { isAdmin, isLoading, logout } = useAdminAuth();
   const { projects, addProject, removeProject } = useProjects();
   
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [showAdd, setShowAdd] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [toast, setToast] = useState({ msg: '', type: '' });
 
-  /* Load theme preference */
+  /* Load theme preference (default: light) */
   useEffect(() => {
     const savedTheme = localStorage.getItem('setu_admin_theme');
     if (savedTheme === 'light' || savedTheme === 'dark') {
       setTheme(savedTheme);
+    } else {
+      setTheme('light');
     }
   }, []);
 

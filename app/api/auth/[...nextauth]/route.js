@@ -40,12 +40,14 @@ const handler = NextAuth({
   callbacks: {
     async redirect({ url, baseUrl }) {
       if (!url) return '/';
-      if (url.startsWith("/")) return url;
       try {
-        const u = new URL(url, baseUrl);
-        const b = new URL(baseUrl);
-        if (u.origin === b.origin) return url;
+        const u = new URL(url, baseUrl || 'http://localhost:3000');
+        const b = new URL(baseUrl || 'http://localhost:3000');
+        if (u.origin === b.origin) {
+          return u.pathname + u.search + u.hash;
+        }
       } catch (e) {}
+      if (url.startsWith("/")) return url;
       return '/';
     },
     async signIn({ user }) {
@@ -53,7 +55,7 @@ const handler = NextAuth({
         await connectMongo();
         
         const userEmail = user?.email?.toLowerCase();
-        if (!userEmail) return '/?error=AccessDenied';
+        if (!userEmail) return false;
 
         // SECURITY: Check if email exists in MongoDB Admin collection
         const adminUser = await Admin.findOne({ email: userEmail });
@@ -62,11 +64,11 @@ const handler = NextAuth({
         if (adminUser || userEmail === fallbackAdminEmail) {
           return true; 
         }
-        // Redirect back to home page with AccessDenied error parameter
-        return '/?error=AccessDenied';
+        // Return false to reject unauthorized user and trigger NextAuth AccessDenied error redirect to pages.error ('/')
+        return false;
       } catch (error) {
         console.error("Auth Error:", error);
-        return '/?error=AccessDenied';
+        return false;
       }
     }
   },

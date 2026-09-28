@@ -42,10 +42,7 @@ const handler = NextAuth({
       if (!url) return '/';
       try {
         const u = new URL(url, baseUrl || 'http://localhost:3000');
-        const b = new URL(baseUrl || 'http://localhost:3000');
-        if (u.origin === b.origin) {
-          return u.pathname + u.search + u.hash;
-        }
+        return u.pathname + u.search + u.hash;
       } catch (e) {}
       if (url.startsWith("/")) return url;
       return '/';

@@ -32,6 +32,8 @@ export default function AdminLoginModal({ isOpen, onClose }) {
   // Check for Access Denied or OAuth error when modal opens
   useEffect(() => {
     if (isOpen) {
+      setGoogleLoading(false);
+      setCredsLoading(false);
       const params = new URLSearchParams(window.location.search);
       const errParam = params.get('error');
       if (errParam) {
@@ -42,7 +44,7 @@ export default function AdminLoginModal({ isOpen, onClose }) {
         } else if (errParam === 'CredentialsSignin') {
           setError('Invalid credentials: Email or password incorrect or account not found.');
         } else {
-          setError('Authentication Error: Invalid credentials or unauthorized account.');
+          setError('Authentication Error: Unauthorized account or invalid credentials.');
         }
         // Clean up URL so error doesn't persist
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -50,6 +52,8 @@ export default function AdminLoginModal({ isOpen, onClose }) {
     } else {
       // Clear error when closing
       setError('');
+      setGoogleLoading(false);
+      setCredsLoading(false);
     }
   }, [isOpen]);
 

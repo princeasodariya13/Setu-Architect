@@ -289,6 +289,69 @@ const AddProjectModal = ({ isOpen, onClose, onAdd }) => {
   );
 }
 
+/* ─── Logout Confirmation Modal ────────────────────────────── */
+const LogoutConfirmModal = ({ isOpen, onClose, onConfirm, isLoggingOut }) => {
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 z-[301] flex items-center justify-center p-4"
+          >
+            <div className="w-full max-w-sm bg-neutral-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-6 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-7 h-7 text-red-400" />
+              </div>
+              <h3 className="text-white font-bold text-lg mb-1">Confirm Logout</h3>
+              <p className="text-neutral-400 text-xs mb-6">
+                Are you sure you want to log out of the Admin Panel?
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isLoggingOut}
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-neutral-300 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  id="confirm-logout-yes"
+                  onClick={onConfirm}
+                  disabled={isLoggingOut}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-xs transition-all shadow-lg shadow-red-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+                      Logging out...
+                    </>
+                  ) : (
+                    'Yes, Logout'
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
 /* ─── Admin Dashboard Page ──────────────────────────────────── */
 export default function AdminPage() {
   const router = useRouter();
@@ -296,6 +359,8 @@ export default function AdminPage() {
   const { projects, addProject, removeProject } = useProjects();
   
   const [showAdd, setShowAdd] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [toast, setToast] = useState({ msg: '', type: '' });
 
   /* Redirect if not admin */
@@ -318,7 +383,8 @@ export default function AdminPage() {
     setTimeout(() => setToast({ msg: '', type: '' }), 3000);
   };
 
-  const handleLogout = async () => {
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
     await logout();
   };
 
@@ -362,7 +428,7 @@ export default function AdminPage() {
               View Site
             </Link>
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutModal(true)}
               id="admin-page-logout"
               className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
             >
@@ -432,6 +498,14 @@ export default function AdminPage() {
 
       {/* Add Project Modal */}
       <AddProjectModal isOpen={showAdd} onClose={() => setShowAdd(false)} onAdd={handleAdd} />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleConfirmLogout}
+        isLoggingOut={isLoggingOut}
+      />
 
       {/* Toast Notification */}
       <AnimatePresence>

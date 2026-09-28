@@ -22,6 +22,7 @@ import {
 import Image from 'next/image';
 import { Button, Container } from '@/components/ui';
 import AdminLoginModal from '@/components/admin/AdminLoginModal';
+import Lightbox from '@/components/Lightbox';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { useProjects } from '@/context/ProjectsContext';
 
@@ -45,7 +46,7 @@ const SERVICES = [
 // --- COMPONENTS ---
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [lightboxImg, setLightboxImg] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
@@ -268,7 +269,7 @@ export default function HomePage() {
                 <div
                   key={proj.id}
                   className="group relative cursor-pointer overflow-hidden bg-white h-[420px] min-w-[300px] sm:min-w-[380px] xl:min-w-[400px] border border-white/50 rounded-[14px] shadow-[0_8px_30px_rgba(0,0,0,0.05)] snap-start flex-shrink-0"
-                  onClick={() => setLightboxImg(proj.img)}
+                  onClick={() => setSelectedProject(proj)}
                 >
                   <img
                     src={proj.img}
@@ -486,29 +487,10 @@ export default function HomePage() {
         onClose={() => setShowAdminLogin(false)}
       />
 
-      {/* LIGHTBOX MODAL */}
-      <AnimatePresence>
-        {lightboxImg && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 sm:p-8"
-          >
-            <button
-              onClick={() => setLightboxImg(null)}
-              className="absolute top-6 right-6 p-2 text-white/70 hover:text-white transition-colors bg-white/10 rounded-full"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            <img
-              src={lightboxImg}
-              alt="Project"
-              className="max-w-full max-h-full object-contain rounded-sm"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* LIGHTBOX MODAL WITH FULL DETAILS */}
+      {selectedProject && (
+        <Lightbox project={selectedProject} onClose={() => setSelectedProject(null)} />
+      )}
 
     </main>
   );

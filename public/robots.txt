@@ -1,11 +1,12 @@
-# Stratos Infrastructure & Construction — robots.txt
+# Setu Architects — robots.txt
 
 User-agent: *
 Allow: /
 
 # Disallow admin and private routes
+Disallow: /admin
 Disallow: /api/
 Disallow: /_next/
 
 # Sitemap
-Sitemap: https://stratosinfrastructure.com/sitemap.xml
+Sitemap: https://setu-architect.vercel.app/sitemap.xml

@@ -1,5 +1,59 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Container } from '@/components/ui';
+import JsonLd from '@/components/JsonLd';
+
+export const metadata = {
+  title: 'Architects & Design Partners | Setu Architects',
+  description:
+    'Explore the network of leading architects and design partners working alongside Setu Architects to deliver landmark structural and architectural projects.',
+  alternates: {
+    canonical: 'https://setu-architect.vercel.app/architects',
+  },
+  openGraph: {
+    title: 'Architects & Design Partners | Setu Architects',
+    description:
+      'Explore the network of leading architects and design partners working alongside Setu Architects to deliver landmark structural and architectural projects.',
+    url: 'https://setu-architect.vercel.app/architects',
+    siteName: 'Setu Architects',
+    locale: 'en_IN',
+    type: 'website',
+    images: [
+      {
+        url: '/images/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Setu Architects',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Architects & Design Partners | Setu Architects',
+    description:
+      'Explore the network of leading architects and design partners working alongside Setu Architects.',
+    images: ['/images/og-image.jpg'],
+  },
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://setu-architect.vercel.app/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Architects Work With',
+      item: 'https://setu-architect.vercel.app/architects',
+    },
+  ],
+};
 
 const ARCHITECTS = [
   { name: '99', initials: '99', accent: 'bg-[#f7e8cf] text-[#8b5e1c]' },
@@ -11,7 +65,7 @@ const ARCHITECTS = [
   { name: 'Bhaulik Patel Architect', initials: 'BP', accent: 'bg-[#efe8de] text-[#64584b]' },
   { name: 'Brijesh Architect', initials: 'BA', accent: 'bg-[#e7ddcc] text-[#715a33]' },
   { name: 'Design Code', initials: 'DC', accent: 'bg-[#f1e9d8] text-[#7b6130]' },
-  { name: 'Design Code Social', initials: 'DS', accent: 'bg-[#efe7d8] text-[#735d37]' },
+  { name: 'Design Code Social', initials: 'DS', accent: 'bg-[#efe7d8] text-[#735737]' },
   { name: 'DSPL Architect', initials: 'DS', accent: 'bg-[#efe0d1] text-[#805d36]' },
   { name: 'Flexible', initials: 'FL', accent: 'bg-[#e8e3df] text-[#66615c]' },
   { name: 'Happy Design Architect', initials: 'HD', accent: 'bg-[#f0e0cf] text-[#7d573c]' },
@@ -41,26 +95,30 @@ const HERO_IMAGE = 'https://images.unsplash.com/photo-1511818966892-d7d671e672a2
 export default function ArchitectsPage() {
   return (
     <main className="min-h-screen bg-[#f7f5ef] pt-24">
+      <JsonLd data={breadcrumbSchema} />
       <section className="relative min-h-[78vh] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `linear-gradient(rgba(14, 14, 14, 0.38), rgba(14, 14, 14, 0.58)), url('${HERO_IMAGE}')`,
-          }}
+        <Image
+          src={HERO_IMAGE}
+          alt="Architects We Work With - Setu Architects"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
+        <div className="absolute inset-0 bg-black/50" />
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_35%)]" />
 
         <Container className="relative z-10 flex min-h-[78vh] items-center justify-center py-20 text-center">
           <div className="max-w-5xl">
             <p className="mb-5 text-[0.72rem] md:text-sm font-bold uppercase tracking-[0.45em] text-[#f4d9a5]">
-              Architects Work With
+              Architects We Work With
             </p>
             <h1 className="text-4xl md:text-6xl lg:text-[6.5rem] font-display font-bold uppercase tracking-[0.16em] text-white leading-[0.95]">
-              Architects Work With
+              Architects We Work With
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-sm md:text-lg text-white/85 leading-relaxed">
-              A curated network of architects and design partners shaping modern spaces with creativity, clarity, and lasting impact.
+              A curated network of architects and design partners shaping modern spaces with creativity, clarity, and lasting structural impact.
             </p>
           </div>
         </Container>
@@ -71,10 +129,10 @@ export default function ArchitectsPage() {
         <Container className="max-w-[90rem]">
           <div className="mb-12 text-center">
             <p className="mb-4 text-[0.72rem] md:text-sm font-bold uppercase tracking-[0.4em] text-[#b08543]">
-              Architects
+              Collaborators
             </p>
             <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-[0.12em] text-neutral-900 leading-none">
-              Our Architects
+              Our Architectural Partners
             </h2>
           </div>
 
@@ -98,9 +156,17 @@ export default function ArchitectsPage() {
             </div>
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="mt-14 flex flex-wrap items-center justify-center gap-6 text-center">
             <Link href="/" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
-              Back to home
+              &larr; Back to home
+            </Link>
+            <span className="text-neutral-300">|</span>
+            <Link href="/projects" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+              Explore Structural Projects &rarr;
+            </Link>
+            <span className="text-neutral-300">|</span>
+            <Link href="/contact" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+              Contact Us &rarr;
             </Link>
           </div>
         </Container>

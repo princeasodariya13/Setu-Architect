@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Container } from '@/components/ui';
 import Lightbox from '@/components/Lightbox';
 
@@ -38,7 +39,7 @@ export default function ProjectsExplorer({ projects }) {
             Portfolio
           </p>
           <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-[0.12em] text-neutral-900 leading-none">
-            Our Recent Projects
+            Our Structural & Architectural Projects
           </h2>
         </div>
 
@@ -70,7 +71,9 @@ export default function ProjectsExplorer({ projects }) {
               >
                 <img
                   src={project.img}
-                  alt={project.name}
+                  alt={`Setu Architects Structural Project: ${project.name}`}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/5" />
@@ -91,6 +94,20 @@ export default function ProjectsExplorer({ projects }) {
             ))}
           </div>
         )}
+
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-6 text-center">
+          <Link href="/" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+            &larr; Back to home
+          </Link>
+          <span className="text-neutral-300">|</span>
+          <Link href="/clients" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+            View Our Clients &rarr;
+          </Link>
+          <span className="text-neutral-300">|</span>
+          <Link href="/contact" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+            Discuss Your Project &rarr;
+          </Link>
+        </div>
       </Container>
 
       {lightboxProject && (

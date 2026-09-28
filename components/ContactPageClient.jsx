@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Container } from '@/components/ui';
 
 const CONTACT_POINTS = [
@@ -65,24 +66,27 @@ export default function ContactPageClient() {
   return (
     <main className="min-h-screen bg-[#f7f5ef] pt-24">
       <section className="relative min-h-[78vh] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `linear-gradient(rgba(14, 14, 14, 0.45), rgba(14, 14, 14, 0.66)), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80')`
-          }}
+        <Image
+          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80"
+          alt="Contact Setu Architects"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
+        <div className="absolute inset-0 bg-black/55" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_36%)]" />
 
         <Container className="relative z-10 flex min-h-[78vh] items-center justify-center py-20 text-center">
           <div className="max-w-5xl">
             <p className="mb-5 text-[0.72rem] md:text-sm font-bold uppercase tracking-[0.45em] text-[#f4d9a5]">
-              Contact Us
+              Contact Setu Architects
             </p>
             <h1 className="text-4xl md:text-6xl lg:text-[6.5rem] font-display font-bold uppercase tracking-[0.16em] text-white leading-[0.95]">
-              Get In Touch
+              Contact Setu Architects
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-sm md:text-lg text-white/85 leading-relaxed">
-              Reach out to discuss your project vision, engineering requirements, or architectural enquiry with our team.
+              Reach out to discuss your project vision, structural engineering requirements, or architectural enquiry with our expert team in Ahmedabad.
             </p>
           </div>
         </Container>
@@ -134,11 +138,11 @@ export default function ContactPageClient() {
               <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-[0.4em] text-[#b08543]">Location</p>
               <h3 className="text-2xl md:text-3xl font-display font-bold uppercase tracking-[0.12em] text-neutral-900">Visit Our Studio</h3>
               <p className="mt-4 text-neutral-600 leading-relaxed">
-                Ahmedabad, Gujarat — a hub for modern design, engineering coordination, and thoughtful structure-led development.
+                Ahmedabad, Gujarat — a hub for modern design, structural engineering coordination, and earth retaining structures.
               </p>
               <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-200">
                 <iframe
-                  title="Setu Architecture office map"
+                  title="Setu Architecture office location map"
                   src="https://www.google.com/maps?q=Ahmedabad%20Gujarat&z=12&output=embed"
                   className="h-[320px] w-full border-0"
                   loading="lazy"
@@ -230,9 +234,17 @@ export default function ContactPageClient() {
       </section>
 
       <section className="bg-white py-16">
-        <Container className="max-w-[90rem] text-center">
+        <Container className="max-w-[90rem] flex flex-wrap items-center justify-center gap-6 text-center">
           <Link href="/" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
-            Back to home
+            &larr; Back to home
+          </Link>
+          <span className="text-neutral-300">|</span>
+          <Link href="/about" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+            About Setu Architects &rarr;
+          </Link>
+          <span className="text-neutral-300">|</span>
+          <Link href="/projects" className="inline-flex items-center text-sm font-bold uppercase tracking-[0.24em] text-[#8b5e1c] transition-colors hover:text-[#6b4512]">
+            View Portfolio &rarr;
           </Link>
         </Container>
       </section>

@@ -48,6 +48,7 @@ export default function Lightbox({ project, onClose }) {
             <img
               src={project.img}
               alt={project.name || 'Project Image'}
+              decoding="async"
               className="max-h-[55vh] w-full object-contain"
             />
           </div>

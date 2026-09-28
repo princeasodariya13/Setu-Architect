@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, ArrowRight } from 'lucide-react';
+import { Menu, X, ChevronDown, ArrowRight, Instagram, Linkedin, Facebook } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/Button';
 
@@ -15,8 +15,8 @@ const NAV_LINKS = [
     name: 'About us',
     href: '/about',
     dropdown: [
-      { name: 'Our Clients', href: '/clients' },
-      { name: 'Architects Work With', href: '/architects' }
+      { name: 'Clients Directory', href: '/clients' },
+      { name: 'Architects We Work With', href: '/architects' }
     ]
   },
   { name: 'Projects', href: '/projects' },

@@ -16,10 +16,13 @@ export default function SpecialityTabs() {
 
   return (
     <section className="py-20 px-6 bg-white">
-      <div className="max-w-[1200px] mx-auto">
-        <p className="uppercase text-xs tracking-[0.2em] font-bold text-[#b08543] text-center mb-2">
+      <div className="max-w-[1200px] mx-auto text-center">
+        <p className="uppercase text-xs tracking-[0.2em] font-bold text-[#b08543] mb-2">
           Our Speciality
         </p>
+        <h2 className="text-3xl font-display font-bold uppercase tracking-wide text-neutral-900 mb-8">
+          Collaborations & Geographic Footprint
+        </h2>
 
         <div className="flex flex-wrap justify-center gap-3 mb-14">
           {TABS.map((tab) => (
@@ -46,7 +49,9 @@ export default function SpecialityTabs() {
               >
                 <img
                   src={`/img/architect_logo/${a.file}`}
-                  alt={a.name}
+                  alt={`Architect Partner: ${a.name}`}
+                  loading="lazy"
+                  decoding="async"
                   className="max-h-16 w-auto mx-auto"
                 />
               </div>
@@ -63,7 +68,9 @@ export default function SpecialityTabs() {
               >
                 <img
                   src={`/img/developers_logo/${c.file}`}
-                  alt={c.name}
+                  alt={`Client Developer Logo: ${c.name}`}
+                  loading="lazy"
+                  decoding="async"
                   className="max-h-16 w-auto mx-auto"
                 />
               </div>

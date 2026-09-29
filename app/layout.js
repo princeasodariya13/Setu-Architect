@@ -5,6 +5,7 @@ import NextAuthProvider from '@/components/providers/NextAuthProvider';
 import { AdminAuthProvider } from '@/context/AdminAuthContext';
 import { ProjectsProvider } from '@/context/ProjectsContext';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import JsonLd from '@/components/JsonLd';
 import '../styles/globals.css';
 
@@ -185,6 +186,7 @@ export default function RootLayout({ children }) {
               </div>
               <WhatsAppWidget />
               <Analytics />
+              <SpeedInsights />
             </ProjectsProvider>
           </AdminAuthProvider>
         </NextAuthProvider>
